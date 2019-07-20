@@ -7,7 +7,7 @@ export default function cart(state = [], action) {
    *
    */
   switch (action.type) {
-    case 'ADD_TO_CART':
+    case '@cart/ADD':
       return produce(state, draft => {
         /** if exists update amount else include a new product */
 
@@ -21,7 +21,7 @@ export default function cart(state = [], action) {
         }
       });
 
-    case 'REMOVE_FROM_CART':
+    case '@cart/REMOVE':
       return produce(state, draft => {
         const productIndex = draft.findIndex(p => p.id === action.id);
 
