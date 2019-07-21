@@ -6,10 +6,21 @@ import {
   MdRemoveCircleOutline,
   MdDelete,
 } from 'react-icons/md';
+
+import { formatPrice } from '../../util/format';
+
 import * as CartActions from '../../store/modules/cart/actions';
 import { Container, ProductTable, Total } from './styles';
 
-function Cart({ cart, removeFromCart }) {
+function Cart({ cart, total, removeFromCart, updateAmount }) {
+  function incrementAmount(product) {
+    updateAmount(product.id, product.amount + 1);
+  }
+
+  function decrementAmount(product) {
+    updateAmount(product.id, product.amount - 1);
+  }
+
   return (
     <Container>
       <ProductTable>
@@ -34,16 +45,24 @@ function Cart({ cart, removeFromCart }) {
               <td>
                 <div>
                   <button type="button">
-                    <MdRemoveCircleOutline size={20} color="#7159c1" />
+                    <MdRemoveCircleOutline
+                      size={20}
+                      color="#7159c1"
+                      onClick={() => decrementAmount(product)}
+                    />
                   </button>
                   <input type="number" readOnly value={product.amount} />
                   <button type="button">
-                    <MdAddCircleOutline size={20} color="#7159c1" />
+                    <MdAddCircleOutline
+                      size={20}
+                      color="#7159c1"
+                      onClick={() => incrementAmount(product)}
+                    />
                   </button>
                 </div>
               </td>
               <td>
-                <strong>U$59,80</strong>
+                <strong>{product.subtotal}</strong>
               </td>
               <td>
                 <button type="button">
@@ -63,15 +82,26 @@ function Cart({ cart, removeFromCart }) {
         <button type="button">Finish Order</button>
         <Total>
           <span>TOTAL</span>
-          <strong>U$29,90</strong>
+          <strong>{total}</strong>
         </Total>
       </footer>
     </Container>
   );
 }
 
+/** try to never have calculations or functions call under the render method. The best way is to do under the mapStateToProps */
 const mapStateToProps = state => ({
-  cart: state.cart,
+  cart: state.cart.map(product => ({
+    ...product,
+    subtotal: formatPrice(product.price * product.amount),
+  })),
+
+  /** recuce the array to a single value */
+  total: formatPrice(
+    state.cart.reduce((total, product) => {
+      return total + product.price * product.amount;
+    }, 0)
+  ),
 });
 
 const mapDispatchToProps = dispatch =>
