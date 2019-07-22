@@ -10,9 +10,12 @@ takeEvery: get all calls
 select: handle state on saga
 
 */
+
+import { toast } from 'react-toastify';
+
 import api from '../../../services/api';
-import formatPrice from '../../../util/format';
-import { addToCartSuccess, updateAmount } from './actions';
+import { formatPrice } from '../../../util/format';
+import { addToCartSuccess, updateAmountSuccess } from './actions';
 
 /**
  * Refactoring to add busssines under the saga
@@ -24,9 +27,21 @@ function* addToCart({ id }) {
     state.cart.find(p => p.id === id)
   );
 
+  /** stock validation */
+  const stock = yield call(api.get, `/stock/${id}`);
+
+  const stockAmount = stock.data.amount;
+  const currentAmount = productExists ? productExists.amount : 0;
+
+  const amount = currentAmount + 1;
+
+  if (amount > stockAmount) {
+    toast.error('Requested Quantity is out of stock');
+    return;
+  }
+
   if (productExists) {
-    const amount = productExists.amount + 1;
-    yield put(updateAmount(id, amount));
+    yield put(updateAmountSuccess(id, amount));
   } else {
     const response = yield call(api.get, `/products/${id}`);
 
@@ -39,4 +54,21 @@ function* addToCart({ id }) {
   }
 }
 
-export default all([takeLatest('@cart/ADD_REQUEST', addToCart)]);
+function* updateAmount({ id, amount }) {
+  if (amount <= 0) return;
+
+  const stock = yield call(api.get, `/stock/${id}`);
+  const stockAmount = stock.data.amount;
+
+  if (amount > stockAmount) {
+    toast.error('Requested Quantity is out of stock');
+    return;
+  }
+
+  yield put(updateAmountSuccess(id, amount));
+}
+
+export default all([
+  takeLatest('@cart/ADD_REQUEST', addToCart),
+  takeLatest('@cart/UPDATE_AMOUNT_REQUEST', updateAmount),
+]);
