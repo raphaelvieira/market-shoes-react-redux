@@ -5,7 +5,7 @@ import { MdShoppingBasket } from 'react-icons/md';
 import { useSelector } from 'react-redux';
 import { Container, Cart } from './styles';
 
-import logo from '../../assets/images/logo.svg';
+import logo from '../../assets/images/logo.png';
 
 export default function Header() {
   /** Hook to redux state  */

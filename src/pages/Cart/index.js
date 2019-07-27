@@ -97,7 +97,7 @@ export default function Cart() {
       </ProductTable>
 
       <footer>
-        <button type="button">Finish Order</button>
+        <button type="button">Order</button>
         <Total>
           <span>TOTAL</span>
           <strong>{total}</strong>
